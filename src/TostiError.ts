@@ -5,8 +5,11 @@ class TostiError extends Error {
   }
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
 export function fail(message: string, assertFn: Function): never {
   const err = new TostiError(`Assertion failed:\n\n${message}\n`);
+
+  /* istanbul ignore if -- @preserve */
   if (
     "captureStackTrace" in Error &&
     typeof Error.captureStackTrace === "function"

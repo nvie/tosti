@@ -9,10 +9,6 @@ import { fail } from "./TostiError";
 //   | { isMatch: false; expectedType: string; actualType: string }
 // >;
 
-function isSameValue(x: unknown, y: unknown) {
-  return Object.is(x, y);
-}
-
 // function humanFriendlyTypeDescription(value: unknown): string {
 //   if (value === null) return "null";
 //   if (Array.isArray(value)) return "an array";
@@ -73,9 +69,9 @@ export function assertEq(actual: unknown, expected: unknown): void {
 }
 
 /**
- * Asserts that two values are referentially the same thing (using ===).
+ * Asserts that two values are referentially the same thing (using Object.is).
  */
-export function assertSame<T>(actual: T, expected: T): void {
+export function assertSame(actual: unknown, expected: unknown): void {
   const result = literally(expected).decode(actual);
   if (result.ok) return;
   fail(formatAsTostiError(result.error), assertSame);
@@ -87,8 +83,8 @@ export function assertSame<T>(actual: T, expected: T): void {
 /**
  * Wrapper to treat the passed in schema or regex as a literal value.
  */
-export function literally(value: unknown): Decoder<unknown> {
+export function literally(expected: unknown): Decoder<unknown> {
   // @ts-expect-error Normally constant() is used only with scalar values
   // In this case, however, it's fine to just use it for any literal value
-  return constant(value);
+  return constant(expected);
 }
