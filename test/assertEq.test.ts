@@ -90,6 +90,30 @@ new Date('2025-01-01T00:00:00.000Z')
     expect(() => assertEq(fn1, fn2)).toThrow();
   });
 
+  test("arrays", () => {
+    assertEq([], []);
+    assertEq([1, 2, 3], [1, 2, 3]);
+    assertEq([[1]], [[1]]);
+
+    expect(() => assertEq([1, 2, 3], [1, 2])).toThrow(`Assertion failed:
+
+[
+  1,
+  2,
+  3,
+]
+^ Too many elements, expected 2, got 3
+`);
+
+    expect(() => assertEq([1], [1, 2])).toThrow(`Assertion failed:
+
+[
+  1,
+]
+^ Too few elements, expected 2, got 1
+`);
+  });
+
   test("compares Date objects specially", () => {
     const sameDate1 = new Date("2025-01-01");
     const sameDate2 = new Date("2025-01-01");
@@ -190,16 +214,6 @@ describe("properties", () => {
     fc.assert(
       fc.property(fc.anything(), fc.anything(), (x, y) => {
         fc.pre(typeof x !== typeof y || (x === null) !== (y === null));
-        expect(() => assertEq(x, y)).toThrow();
-      }),
-    );
-  });
-
-  test("∀x, y :: t(x) = t(y) ∧ x != y → !assertEq(x, y)", () => {
-    fc.assert(
-      fc.property(fc.anything(), fc.anything(), (x, y) => {
-        fc.pre(typeof x === typeof y);
-        fc.pre(x !== y);
         expect(() => assertEq(x, y)).toThrow();
       }),
     );

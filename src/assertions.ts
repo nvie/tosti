@@ -1,71 +1,62 @@
 import type { Decoder } from "decoders";
-import { constant, date, formatInline, isDecoder } from "decoders";
+import { constant, date, formatInline, isDecoder, poja, tuple } from "decoders";
 
-// import type { Relax } from "./lib/Relax";
 import { fail } from "./TostiError";
 
-// type TypecheckResult = Relax<
-//   | { isMatch: true }
-//   | { isMatch: false; expectedType: string; actualType: string }
-// >;
+type Expecter = Decoder<unknown>;
 
-// function humanFriendlyTypeDescription(value: unknown): string {
-//   if (value === null) return "null";
-//   if (Array.isArray(value)) return "an array";
-//   if (value instanceof Date) return "a Date";
-//   if (value instanceof RegExp) return "a RegExp";
-//   if (value instanceof Map) return "a Map";
-//   if (value instanceof Set) return "a Set";
-//
-//   const t = typeof value;
-//   if (t === "object") return "an object";
-//   if (t === "undefined") return "undefined";
-//   return `a ${t}`;
-// }
-
-// function checkType(actual: unknown, expected: unknown): TypecheckResult {
-//   if (isSameValue(actual, expected)) return { isMatch: true };
-//
-//   return {
-//     isMatch: false,
-//     expectedType: humanFriendlyTypeDescription(expected),
-//     actualType: humanFriendlyTypeDescription(actual),
-//   };
-// }
-
-function makeDecoder(expectedValue: unknown): Decoder<unknown> {
-  if (isDecoder(expectedValue)) return expectedValue;
-
-  if (Array.isArray(expectedValue)) {
-    throw new Error("Deep array equality not implemented yet");
-  } else if (expectedValue !== null && typeof expectedValue === "object") {
-    if (expectedValue instanceof Date) {
-      return date.reject((d) =>
-        d.getTime() === expectedValue.getTime()
-          ? null
-          : `Must be new Date('${expectedValue.toISOString()}')`,
-      );
-    }
-    throw new Error("Deep object equality not implemented yet");
-  } else {
-    return literally(expectedValue);
-  }
+function makeArrayExpecter(expectedValue: unknown[]): Expecter {
+  return poja
+    .reject((arr) =>
+      arr.length > expectedValue.length
+        ? `Too many elements, expected ${expectedValue.length}, got ${arr.length}`
+        : arr.length < expectedValue.length
+          ? `Too few elements, expected ${expectedValue.length}, got ${arr.length}`
+          : null,
+    )
+    .pipe(
+      tuple(
+        // @ts-expect-error deliberate
+        ...expectedValue.map((v) => makeExpecter(v)),
+      ),
+    );
 }
 
-// TODO Maybe export this directly from decoders instead?
-type Annotation = Parameters<typeof formatInline>[0];
+function makeDateExpecter(expectedValue: Date): Expecter {
+  return date.reject((d) =>
+    d.getTime() === expectedValue.getTime()
+      ? null
+      : `Must be new Date('${expectedValue.toISOString()}')`,
+  );
+}
 
-function formatAsTostiError(err: Annotation): string {
-  return formatInline(err);
+function makeExpecter(expectedValue: unknown): Expecter {
+  if (isDecoder(expectedValue)) return expectedValue;
+
+  // Arrays are handled specially
+  if (Array.isArray(expectedValue)) {
+    return makeArrayExpecter(expectedValue);
+  }
+
+  // Objects, including class instances, are handled specially
+  if (expectedValue !== null && typeof expectedValue === "object") {
+    if (expectedValue instanceof Date) {
+      return makeDateExpecter(expectedValue);
+    }
+    throw new Error("Deep object equality not implemented yet");
+  }
+
+  // Everything else is treated as a literal value
+  return literally(expectedValue);
 }
 
 /**
  * Asserts that two values are deeply equal.
  */
 export function assertEq(actual: unknown, expected: unknown): void {
-  const result = makeDecoder(expected).decode(actual);
+  const result = makeExpecter(expected).decode(actual);
   if (result.ok) return;
-  fail(formatAsTostiError(result.error), assertEq);
+  fail(formatInline(result.error), assertEq);
 }
 
 /**
@@ -74,7 +65,7 @@ export function assertEq(actual: unknown, expected: unknown): void {
 export function assertSame(actual: unknown, expected: unknown): void {
   const result = literally(expected).decode(actual);
   if (result.ok) return;
-  fail(formatAsTostiError(result.error), assertSame);
+  fail(formatInline(result.error), assertSame);
 
   // if (isSameValue(actual, expected)) return;
   // fail(`Expected ${String(expected)}, but got ${String(actual)}`, assertSame);
@@ -83,7 +74,7 @@ export function assertSame(actual: unknown, expected: unknown): void {
 /**
  * Wrapper to treat the passed in schema or regex as a literal value.
  */
-export function literally(expected: unknown): Decoder<unknown> {
+export function literally(expected: unknown): Expecter {
   // @ts-expect-error Normally constant() is used only with scalar values
   // In this case, however, it's fine to just use it for any literal value
   return constant(expected);
