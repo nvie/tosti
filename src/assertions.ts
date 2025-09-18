@@ -1,6 +1,15 @@
 import type { Decoder } from "decoders";
-import { constant, date, formatInline, isDecoder, poja, tuple } from "decoders";
+import {
+  constant,
+  date,
+  formatInline,
+  isDecoder,
+  poja,
+  regex,
+  tuple,
+} from "decoders";
 
+import { isPojo } from "./decoders";
 import { fail } from "./TostiError";
 
 type Expecter = Decoder<unknown>;
@@ -30,6 +39,14 @@ function makeDateExpecter(expectedValue: Date): Expecter {
   );
 }
 
+function makeObjectExpecter(_expectedValue: object): Expecter {
+  throw new Error("Deep object equality not implemented yet");
+}
+
+function makeRegexExpecter(expectedValue: RegExp): Expecter {
+  return regex(expectedValue, `Must match ${expectedValue.toString()}`);
+}
+
 function makeExpecter(expectedValue: unknown): Expecter {
   if (isDecoder(expectedValue)) return expectedValue;
 
@@ -38,12 +55,19 @@ function makeExpecter(expectedValue: unknown): Expecter {
     return makeArrayExpecter(expectedValue);
   }
 
-  // Objects, including class instances, are handled specially
-  if (expectedValue !== null && typeof expectedValue === "object") {
-    if (expectedValue instanceof Date) {
-      return makeDateExpecter(expectedValue);
-    }
-    throw new Error("Deep object equality not implemented yet");
+  // RegExps
+  if (expectedValue instanceof RegExp) {
+    return makeRegexExpecter(expectedValue);
+  }
+
+  // Dates
+  if (expectedValue instanceof Date) {
+    return makeDateExpecter(expectedValue);
+  }
+
+  // Plain old JavaScript objects
+  if (isPojo(expectedValue)) {
+    return makeObjectExpecter(expectedValue);
   }
 
   // Everything else is treated as a literal value

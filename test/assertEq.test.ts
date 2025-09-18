@@ -153,6 +153,27 @@ new Date('2025-01-01T00:00:00.000Z')
   // });
 });
 
+describe("assertEq w/ RegExp", () => {
+  test("handles regular expressions as expected values", () => {
+    assertEq("a", /a/);
+    assertEq("AaAaAaAa", /^(aa)+$/i);
+    assertEq({ foo: "AaAaAaAa" }, { foo: /^(aa)+$/i });
+  });
+
+  test("handles regular expressions as expected values", () => {
+    expect(() => assertEq("b", /a/i)).toThrow(`Assertion failed:
+
+"b"
+^^^ Must match /a/i
+`);
+    expect(() => assertEq("AaAaAaAaa", /^(aa)+$/i)).toThrow(`Assertion failed:
+
+"AaAaAaAaa"
+^^^^^^^^^^^ Must match /^(aa)+$/i
+`);
+  });
+});
+
 describe("assertEq w/ decoders", () => {
   test("handles decoders as expected values", () => {
     assertEq(42, either(number, string));
