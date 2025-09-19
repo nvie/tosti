@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="./assets/tosti.png" alt="Tosti project logo" style="max-width: 512px" />
+  <img src="./assets/tosti.png" alt="Tosti project logo" style="max-width: 384px" />
 </p>
 
 # Tosti
