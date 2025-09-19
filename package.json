@@ -36,6 +36,23 @@
     "LICENSE",
     "README.md"
   ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nvie/tosti.git"
+  },
+  "author": "Vincent Driessen",
+  "homepage": "https://github.com/nvie/tosti#readme",
+  "bugs": {
+    "url": "https://github.com/nvie/tosti/issues"
+  },
+  "keywords": [
+    "assertion",
+    "assertions",
+    "testing",
+    "vitest",
+    "unit-test",
+    "test"
+  ],
   "peerDependencies": {
     "decoders": "https://pkg.pr.new/decoders@3488cf5"
   },
@@ -59,14 +76,6 @@
     "vite-tsconfig-paths": "^5.1.4",
     "vitest": "^3.2.4"
   },
-  "author": "Vincent Driessen",
-  "keywords": [
-    "assertion",
-    "assertions",
-    "testing",
-    "vitest",
-    "unit-test",
-    "test"
-  ],
+  "githubUrl": "https://github.com/nvie/tosti",
   "sideEffects": false
 }
