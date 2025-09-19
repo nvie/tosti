@@ -35,10 +35,11 @@ export function literally(expected: unknown): Expector {
 }
 
 /**
- * Builds an expector that ensures at least the provided values are present,
- * but allows for more keys to be present.
+ * Builds an expector that partially matches input. At the very least, all
+ * provided fields need to be present in the actual value, but more keys are
+ * allowed.
  */
-export function partial(expected: Record<PropertyKey, unknown>): Expector {
+export function partially(expected: Record<PropertyKey, unknown>): Expector {
   return pojo.pipe(inexact(mapValues(expected, makeExpector)));
 }
 
