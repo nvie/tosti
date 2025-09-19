@@ -6,20 +6,15 @@
 
 [![npm](https://img.shields.io/npm/v/tosti.svg)](https://www.npmjs.com/package/tosti)
 [![license](https://img.shields.io/npm/l/tosti.svg)](https://github.com/nvie/tosti/blob/main/LICENSE)
-[![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/nvie/tosti/test.yml?branch=main)](https://github.com/nvie/tosti/actions/workflows/test.yml)
-[![npm bundle size (minified + gzip)](https://img.shields.io/bundlephobia/minzip/tosti.svg)](https://bundlephobia.com/result?p=tosti)
 [![Code Coverage](https://img.shields.io/badge/coverage-100%25-brightgreen.svg)](https://github.com/nvie/tosti)
 
-A simple, powerful assertion library for Vitest unit tests that provides clear error messages and type-safe assertions.
+A simple, powerful assertion library for Vitest (or any other test runner) that provides clear error messages and type-safe assertions.
 
 ## Features
 
+- 🤸‍♂️ **Flexible matching** - Supports exact values, patterns, and custom expectors
 - 🎯 **Clear error messages** - Beautiful, readable assertion failures
-- 🔒 **Type-safe** - Full TypeScript support with proper type inference
-- ⚡ **Zero dependencies** - Lightweight and fast
-- 🌊 **Promise support** - Works seamlessly with async/await
-- 🎨 **Flexible matching** - Supports exact values, patterns, and custom expectors
-- 📦 **100% test coverage** - Thoroughly tested and reliable
+- 🔋 **100% test coverage** - Thoroughly tested and reliable
 
 ## Installation
 
