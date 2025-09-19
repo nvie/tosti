@@ -7,7 +7,7 @@ on:
     types: [opened, synchronize, reopened]
 
 jobs:
-  publish-to-pkg-pr-new:
+  build:
     runs-on: ubuntu-latest
 
     steps:
