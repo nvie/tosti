@@ -5,6 +5,7 @@ import {
   exact,
   formatInline,
   isDecoder,
+  isPromiseLike,
   poja,
   pojo,
   regex,
@@ -91,8 +92,32 @@ function makeExpecter(expectedValue: unknown): Expecter {
 /**
  * Asserts that two values are deeply equal.
  */
-export function assertEq(actual: unknown, expected: unknown): void {
+export async function assertEq(actual: PromiseLike<unknown>, expected: unknown): Promise<void>; // prettier-ignore
+/**
+ * Asserts that two values are deeply equal.
+ */
+export function assertEq(actual: unknown, expected: unknown): void;
+export function assertEq(
+  actual: unknown,
+  expected: unknown,
+): void | Promise<void> {
+  return isPromiseLike(actual)
+    ? assertEq_async(actual, expected)
+    : // eslint-disable-next-line @typescript-eslint/no-confusing-void-expression
+      assertEq_sync(actual, expected);
+}
+
+function assertEq_sync(actual: unknown, expected: unknown): void {
   const result = makeExpecter(expected).decode(actual);
+  if (result.ok) return;
+  fail(formatInline(result.error), assertEq);
+}
+
+async function assertEq_async(
+  actual$: PromiseLike<unknown>,
+  expected: unknown,
+): Promise<void> {
+  const result = makeExpecter(expected).decode(await actual$);
   if (result.ok) return;
   fail(formatInline(result.error), assertEq);
 }
@@ -100,13 +125,34 @@ export function assertEq(actual: unknown, expected: unknown): void {
 /**
  * Asserts that two values are referentially the same thing (using Object.is).
  */
-export function assertSame(actual: unknown, expected: unknown): void {
+export async function assertSame(actual: PromiseLike<unknown>, expected: unknown): Promise<void>; // prettier-ignore
+/**
+ * Asserts that two values are referentially the same thing (using Object.is).
+ */
+export function assertSame(actual: unknown, expected: unknown): void;
+export function assertSame(
+  actual: unknown,
+  expected: unknown,
+): void | Promise<void> {
+  return isPromiseLike(actual)
+    ? assertSame_async(actual, expected)
+    : // eslint-disable-next-line @typescript-eslint/no-confusing-void-expression
+      assertSame_sync(actual, expected);
+}
+
+export function assertSame_sync(actual: unknown, expected: unknown): void {
   const result = literally(expected).decode(actual);
   if (result.ok) return;
   fail(formatInline(result.error), assertSame);
+}
 
-  // if (isSameValue(actual, expected)) return;
-  // fail(`Expected ${String(expected)}, but got ${String(actual)}`, assertSame);
+export async function assertSame_async(
+  actual$: PromiseLike<unknown>,
+  expected: unknown,
+): Promise<void> {
+  const result = literally(expected).decode(await actual$);
+  if (result.ok) return;
+  fail(formatInline(result.error), assertSame);
 }
 
 /**

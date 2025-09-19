@@ -3,6 +3,8 @@ import { describe, expect, test } from "vitest";
 
 import { assertSame } from "~";
 
+import { eventually } from "./utils";
+
 describe("assertSame", () => {
   test("passes when values are equal", () => {
     assertSame(42, 42);
@@ -10,11 +12,7 @@ describe("assertSame", () => {
     assertSame(true, true);
     assertSame(null, null);
     assertSame(undefined, undefined);
-  });
-
-  // TODO Fix this!
-  test.skip("TODO: NaN is weird, fix this later", () => {
-    assertSame(NaN, NaN); // Object.is(NaN, NaN) is true, so this should pass
+    assertSame(NaN, NaN); // Although NaN != NaN, Object.is(NaN, NaN) is true, so this should pass
   });
 
   test("throws when values are not equal", () => {
@@ -79,6 +77,32 @@ null
     assertSame(fn1, fn1);
     assertSame(fn2, fn2);
     expect(() => assertSame(fn1, fn2)).toThrow();
+  });
+});
+
+describe("assertSame w/ promises", () => {
+  test("awaits promises", async () => {
+    await assertSame(eventually(42), 42);
+    await assertSame(Promise.resolve(42), 42);
+  });
+
+  test("awaits failure", async () => {
+    await expect(assertSame(eventually(0), 42)).rejects
+      .toThrow(`Assertion failed:
+
+0
+^ Must be 42
+`);
+  });
+
+  test("assertSame returns nothing when `actual` isn't a promise", () => {
+    expect(assertSame(42, 42)).toBeUndefined();
+    expect(assertSame(42, 42)).toBeUndefined();
+  });
+
+  test("assertSame returns nothing when `actual` value isn't a promise", async () => {
+    await expect(assertSame(eventually(42), 42)).resolves.toBeUndefined();
+    await expect(assertSame(Promise.resolve(42), 42)).resolves.toBeUndefined();
   });
 });
 

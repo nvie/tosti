@@ -4,6 +4,8 @@ import { describe, expect, test } from "vitest";
 
 import { anything, assertEq, between, gt, gte, lt, lte } from "~";
 
+import { eventually } from "./utils";
+
 describe("assertEq w/ values", () => {
   test("passes when values are equal", () => {
     assertEq(42, 42);
@@ -11,10 +13,7 @@ describe("assertEq w/ values", () => {
     assertEq(true, true);
     assertEq(null, null);
     assertEq(undefined, undefined);
-  });
-
-  test("TODO: NaN is weird, fix this later", () => {
-    assertEq(NaN, NaN); // Object.is(NaN, NaN) is true, so this should pass
+    assertEq(NaN, NaN); // Although NaN != NaN, Object.is(NaN, NaN) is true, so this should pass
   });
 
   test("throws beautiful error when types don't match", () => {
@@ -216,6 +215,31 @@ new Date('2025-01-01T00:00:00.000Z')
   // `,
   //     );
   // });
+});
+
+describe("assertEq w/ promises", () => {
+  test("awaits promises", async () => {
+    await assertEq(eventually(42), 42);
+    await assertEq(Promise.resolve(42), 42);
+  });
+
+  test("awaits failure", async () => {
+    await expect(assertEq(eventually(0), 42)).rejects.toThrow(`Assertion failed:
+
+0
+^ Must be 42
+`);
+  });
+
+  test("assertEq returns nothing when `actual` isn't a promise", () => {
+    expect(assertEq(42, 42)).toBeUndefined();
+    expect(assertEq(42, 42)).toBeUndefined();
+  });
+
+  test("assertEq returns nothing when `actual` value isn't a promise", async () => {
+    await expect(assertEq(eventually(42), 42)).resolves.toBeUndefined();
+    await expect(assertEq(Promise.resolve(42), 42)).resolves.toBeUndefined();
+  });
 });
 
 describe("assertEq w/ RegExp", () => {
