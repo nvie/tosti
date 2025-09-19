@@ -1,6 +1,6 @@
 {
   "name": "tosti",
-  "version": "1.0.0",
+  "version": "0.1.0",
   "description": "A simple assertion library for use in Vitest unit tests",
   "license": "MIT",
   "type": "module",
