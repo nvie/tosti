@@ -1,8 +1,8 @@
-import { either, number, string } from "decoders";
+import { array, either, number, string } from "decoders";
 import * as fc from "fast-check";
 import { describe, expect, test } from "vitest";
 
-import { assertEq, between, gt, gte, lt, lte } from "~";
+import { anything, assertEq, between, gt, gte, lt, lte } from "~";
 
 describe("assertEq w/ values", () => {
   test("passes when values are equal", () => {
@@ -13,8 +13,7 @@ describe("assertEq w/ values", () => {
     assertEq(undefined, undefined);
   });
 
-  // TODO Fix this!
-  test.skip("TODO: NaN is weird, fix this later", () => {
+  test("TODO: NaN is weird, fix this later", () => {
     assertEq(NaN, NaN); // Object.is(NaN, NaN) is true, so this should pass
   });
 
@@ -114,6 +113,72 @@ new Date('2025-01-01T00:00:00.000Z')
 `);
   });
 
+  test("deep objects", () => {
+    assertEq({}, {});
+    assertEq({ a: 123 }, { a: 123 });
+    assertEq({ b: [77] }, { b: [77] });
+    assertEq({ 0: 1 }, { "0": 1 });
+    assertEq({ "0": 1 }, { 0: 1 });
+
+    expect(() => assertEq({ 1: 2, 3: 4 }, { "1": 2, "3": -4 }))
+      .toThrow(`Assertion failed:
+
+{
+  "1": 2,
+  "3": 4,
+       ^ Must be -4
+}
+`);
+
+    expect(() =>
+      assertEq(
+        {
+          a: { b: { c: { d: { e: { f: { g: 3, h: "👋", i: [2, 2] } } } } } },
+        },
+        {
+          a: {
+            b: {
+              c: {
+                d: {
+                  e: {
+                    f: {
+                      g: between(1, 2),
+                      h: anything,
+                      i: array(number),
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      ),
+    ).toThrow(`Assertion failed:
+
+{
+  "a": {
+    "b": {
+      "c": {
+        "d": {
+          "e": {
+            "f": {
+              "g": 3,
+                   ^ Too high, must be <= 2
+              "h": "👋",
+              "i": [
+                2,
+                2,
+              ],
+            },
+          },
+        },
+      },
+    },
+  },
+}
+`);
+  });
+
   test("compares Date objects specially", () => {
     const sameDate1 = new Date("2025-01-01");
     const sameDate2 = new Date("2025-01-01");
@@ -207,7 +272,7 @@ describe("assertEq w/ decoders", () => {
       `Assertion failed:
 
 32
-^^ Too low, must be >=40
+^^ Too low, must be >= 40
 `,
     );
 
@@ -215,19 +280,27 @@ describe("assertEq w/ decoders", () => {
       `Assertion failed:
 
 58
-^^ Too high, must be <=50
+^^ Too high, must be <= 50
 `,
     );
   });
 });
 
 describe("properties", () => {
-  // TODO: Make this one pass later
-  test.skip("∀x :: assertEq(x, structuredClone(x))", () => {
+  test("∀x :: assertEq(x, structuredClone(x))", () => {
     fc.assert(
       fc.property(fc.anything(), (x) => {
         assertEq(x, structuredClone(x)); // This should never throw
       }),
+      {
+        examples: [
+          // Counter example 1
+          [[Number.NaN]],
+
+          // Counter example 2
+          [{ ["__proto__"]: 0 }],
+        ],
+      },
     );
   });
 
@@ -249,21 +322,45 @@ describe("properties", () => {
     );
   });
 
-  // TODO: Make this one pass later
-  test.skip("∀arr :: assertEq(arr, structuredClone(arr))", () => {
+  test("∀arr :: assertEq(arr, structuredClone(arr))", () => {
     fc.assert(
       fc.property(fc.array(fc.anything()), (arr) => {
         assertEq(arr, structuredClone(arr)); // This should never throw
       }),
+      {
+        examples: [
+          // Counter example 1 (FIXED)
+          [[Number.NaN]],
+
+          // Counter example 2 (UNDER INVESTIGATION)
+          [[{ ["__proto__"]: 42 }]],
+        ],
+      },
     );
   });
 
-  // TODO: Make this one pass later
-  test.skip("∀obj :: assertEq(obj, structuredClone(obj))", () => {
+  test("∀obj :: assertEq(obj, structuredClone(obj))", () => {
     fc.assert(
-      fc.property(fc.dictionary(fc.string(), fc.anything()), (obj) => {
-        assertEq(obj, structuredClone(obj)); // This should never throw
-      }),
+      fc.property(
+        fc.dictionary(fc.string(), fc.anything(), {
+          noNullPrototype: true,
+        }),
+        (obj) => {
+          assertEq(obj, structuredClone(obj)); // This should never throw
+        },
+      ),
+      {
+        examples: [
+          // Counter example 1
+          [Object.create(null)],
+
+          // Counter example 2
+          [{ __proto__: null }], // Same as above, but with __proto__ syntax
+
+          // Counter example 3
+          [{ ["__proto__"]: null }], // This actually creates an object with an actual __proto__ property
+        ],
+      },
     );
   });
 });

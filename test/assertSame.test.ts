@@ -88,6 +88,12 @@ describe("properties", () => {
       fc.property(fc.anything(), (a) => {
         assertSame(a, a); // This should never throw
       }),
+      {
+        examples: [
+          // Counter example 1
+          [NaN],
+        ],
+      },
     );
   });
 

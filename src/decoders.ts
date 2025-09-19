@@ -1,11 +1,11 @@
 import type { Decoder } from "decoders";
-import { number } from "decoders";
+import { number, unknown } from "decoders";
 
 /**
  * Is the given value a POJO (plain old JavaScript object)?
  */
 // TODO: Consider exporting this from `decoders`
-export function isPojo(value: unknown): value is Record<string, unknown> {
+export function isPojo(value: unknown): value is Record<PropertyKey, unknown> {
   return (
     value !== null &&
     value !== undefined &&
@@ -17,23 +17,25 @@ export function isPojo(value: unknown): value is Record<string, unknown> {
 }
 
 // Custom decoders for quick number comparisons
+export const anything = unknown;
+
 export const gte = (n: number): Decoder<number> =>
-  number.refine((value) => value >= n, `Must be >=${n}`);
+  number.refine((value) => value >= n, `Must be >= ${n}`);
 
 export const gt = (n: number): Decoder<number> =>
-  number.refine((value) => value > n, `Must be >${n}`);
+  number.refine((value) => value > n, `Must be > ${n}`);
 
 export const lte = (n: number): Decoder<number> =>
-  number.refine((value) => value <= n, `Must be <=${n}`);
+  number.refine((value) => value <= n, `Must be <= ${n}`);
 
 export const lt = (n: number): Decoder<number> =>
-  number.refine((value) => value < n, `Must be <${n}`);
+  number.refine((value) => value < n, `Must be < ${n}`);
 
 export const between = (min: number, max: number): Decoder<number> =>
   number.reject((value) =>
     value >= min
       ? value <= max
         ? null
-        : `Too high, must be <=${max}`
-      : `Too low, must be >=${min}`,
+        : `Too high, must be <= ${max}`
+      : `Too low, must be >= ${min}`,
   );

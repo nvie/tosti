@@ -2,53 +2,67 @@ import type { Decoder } from "decoders";
 import {
   constant,
   date,
+  exact,
   formatInline,
   isDecoder,
   poja,
+  pojo,
   regex,
   tuple,
+  unknown,
 } from "decoders";
 
 import { isPojo } from "./decoders";
 import { fail } from "./TostiError";
+import { mapValues } from "./utils";
 
 type Expecter = Decoder<unknown>;
 
-function makeArrayExpecter(expectedValue: unknown[]): Expecter {
+function makeArrayExpecter(expected: unknown[]): Expecter {
   return poja
     .reject((arr) =>
-      arr.length > expectedValue.length
-        ? `Too many elements, expected ${expectedValue.length}, got ${arr.length}`
-        : arr.length < expectedValue.length
-          ? `Too few elements, expected ${expectedValue.length}, got ${arr.length}`
+      arr.length > expected.length
+        ? `Too many elements, expected ${expected.length}, got ${arr.length}`
+        : arr.length < expected.length
+          ? `Too few elements, expected ${expected.length}, got ${arr.length}`
           : null,
     )
     .pipe(
       tuple(
         // @ts-expect-error deliberate
-        ...expectedValue.map((v) => makeExpecter(v)),
+        ...expected.map((v) => makeExpecter(v)),
       ),
     );
 }
 
-function makeDateExpecter(expectedValue: Date): Expecter {
+function makeDateExpecter(expected: Date): Expecter {
   return date.reject((d) =>
-    d.getTime() === expectedValue.getTime()
+    d.getTime() === expected.getTime()
       ? null
-      : `Must be new Date('${expectedValue.toISOString()}')`,
+      : `Must be new Date('${expected.toISOString()}')`,
   );
 }
 
-function makeObjectExpecter(_expectedValue: object): Expecter {
-  throw new Error("Deep object equality not implemented yet");
+function makeObjectExpecter(expected: Record<PropertyKey, unknown>): Expecter {
+  return pojo.pipe(exact(mapValues(expected, makeExpecter)));
 }
 
 function makeRegexExpecter(expectedValue: RegExp): Expecter {
   return regex(expectedValue, `Must match ${expectedValue.toString()}`);
 }
 
+const nanExpecter: Expecter = unknown.refine(
+  (x) => Number.isNaN(x as number),
+  "Must be NaN",
+);
+
 function makeExpecter(expectedValue: unknown): Expecter {
   if (isDecoder(expectedValue)) return expectedValue;
+
+  // NaN is handled specially
+  if (Number.isNaN(expectedValue as number)) {
+    return nanExpecter;
+  }
 
   // Arrays are handled specially
   if (Array.isArray(expectedValue)) {
@@ -99,6 +113,9 @@ export function assertSame(actual: unknown, expected: unknown): void {
  * Wrapper to treat the passed in schema or regex as a literal value.
  */
 export function literally(expected: unknown): Expecter {
+  // NaN is a weird one, because Object.is(NaN, NaN) is true
+  if (Number.isNaN(expected)) return nanExpecter;
+
   // @ts-expect-error Normally constant() is used only with scalar values
   // In this case, however, it's fine to just use it for any literal value
   return constant(expected);
