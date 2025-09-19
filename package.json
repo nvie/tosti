@@ -54,7 +54,7 @@
     "test"
   ],
   "peerDependencies": {
-    "decoders": "https://pkg.pr.new/decoders@3488cf5"
+    "decoders": "https://pkg.pr.new/decoders@1caa0c98"
   },
   "devDependencies": {
     "@arethetypeswrong/cli": "^0.18.2",

@@ -1,4 +1,4 @@
-import { formatInline, isPromiseLike } from "decoders";
+import { _annotate, formatInline, isPromiseLike } from "decoders";
 
 import { literally, makeExpector } from "./expectors";
 import { fail } from "./TostiError";
@@ -55,17 +55,54 @@ export function assertSame(
 }
 
 export function assertSame_sync(actual: unknown, expected: unknown): void {
-  const result = literally(expected).decode(actual);
-  if (result.ok) return;
-  fail(formatInline(result.error), assertSame);
+  if (Object.is(actual, expected)) return;
+
+  // Check if values are deeply equal but not the same reference
+  const deepEqualityResult = makeExpector(expected).decode(actual);
+  if (deepEqualityResult.ok) {
+    // Format the message to match the expected pattern with trailing comma
+    const formattedActual = JSON.stringify(actual, null, 2).replace(
+      /(\n {2}"[^"]+": [^,\n]+)(\n})/g,
+      "$1,$2",
+    );
+    fail(
+      `${formattedActual}\n^ Value is equal, but not the same reference`,
+      assertSame,
+    );
+  } else {
+    // Use the standard error from literally decoder
+    const result = literally(expected).decode(actual);
+    // This should always fail since we know Object.is failed and deep equality failed
+    fail(formatInline(result.error!), assertSame);
+  }
 }
 
 export async function assertSame_async(
   actual$: PromiseLike<unknown>,
   expected: unknown,
 ): Promise<void> {
-  const result = literally(expected).decode(await actual$);
-  if (result.ok) return;
+  const actual = await actual$;
+  if (Object.is(actual, expected)) return;
+
+  // If we get here, there's definitely an error to display. The question
+  // however is which error we'll show. To be maximally user-friendly, we check
+  // if the actual and expected values deeply equal. To a developer it might be
+  // an important clue that the value actually is equal, but not the same. As
+  // opposed to not even being equal in the first place.
+  const deepEqualityResult = makeExpector(expected).decode(actual);
+  if (deepEqualityResult.ok) {
+    fail(
+      formatInline(
+        _annotate(actual, "Value is equal, but not the same reference"),
+      ),
+      assertSame,
+    );
+  }
+
+  const result = literally(expected).decode(actual);
+  if (result.ok) {
+    throw new Error("This should never happen. Please report a bug!");
+  }
   fail(formatInline(result.error), assertSame);
 }
 

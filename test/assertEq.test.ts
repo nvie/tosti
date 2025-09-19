@@ -14,6 +14,7 @@ describe("assertEq w/ values", () => {
     assertEq(null, null);
     assertEq(undefined, undefined);
     assertEq(NaN, NaN); // Although NaN != NaN, Object.is(NaN, NaN) is true, so this should pass
+    assertEq(0, -0);
   });
 
   test("throws beautiful error when types don't match", () => {

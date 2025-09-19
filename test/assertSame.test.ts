@@ -25,6 +25,16 @@ describe("assertSame", () => {
 `);
 
     expect(() => {
+      assertSame({ a: 1 }, { a: 1 });
+    }).toThrow(`Assertion failed:
+
+{
+  "a": 1,
+}
+^ Value is equal, but not the same reference
+`);
+
+    expect(() => {
       assertSame("hello", "world");
     }).toThrow(`Assertion failed:
 
@@ -49,18 +59,11 @@ null
 `);
   });
 
-  test("uses strict equality (===)", () => {
-    expect(() => {
-      assertSame(0, false);
-    }).toThrow();
-
-    expect(() => {
-      assertSame("", false);
-    }).toThrow();
-
-    expect(() => {
-      assertSame(1, "1");
-    }).toThrow();
+  test("uses strict equality, via Object.is semantics", () => {
+    expect(() => assertSame(0, false)).toThrow();
+    expect(() => assertSame("", false)).toThrow();
+    expect(() => assertSame(1, "1")).toThrow();
+    expect(() => assertSame(0, -0)).toThrow(); // assertSame(0, -0) throws, but assertEq(0, -0) does not
   });
 
   test("throws with symbols", () => {
@@ -92,6 +95,17 @@ describe("assertSame w/ promises", () => {
 
 0
 ^ Must be 42
+`);
+  });
+
+  test("awaits failure with equal but not same reference", async () => {
+    await expect(assertSame(eventually({ a: 1 }), { a: 1 })).rejects
+      .toThrow(`Assertion failed:
+
+{
+  "a": 1,
+}
+^ Value is equal, but not the same reference
 `);
   });
 
