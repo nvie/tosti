@@ -34,12 +34,14 @@
     "LICENSE",
     "README.md"
   ],
+  "peerDependencies": {
+    "decoders": "https://pkg.pr.new/decoders@3488cf5"
+  },
   "devDependencies": {
     "@arethetypeswrong/cli": "^0.18.2",
     "@eslint/js": "^9.35.0",
     "@types/node": "^24.5.2",
     "@vitest/coverage-istanbul": "^3.2.4",
-    "decoders": "^2.8.0-0",
     "eslint": "^9.35.0",
     "eslint-plugin-import": "^2.32.0",
     "eslint-plugin-simple-import-sort": "^12.1.1",
