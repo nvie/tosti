@@ -68,3 +68,60 @@ export async function assertSame_async(
   if (result.ok) return;
   fail(formatInline(result.error), assertSame);
 }
+
+/**
+ * Asserts that a function throws an error that matches the expected message or pattern.
+ */
+export function assertThrows(
+  thunk: () => unknown,
+  expectedMessage: string | RegExp,
+): void {
+  let threw = false;
+  let caughtError: unknown;
+  try {
+    thunk();
+  } catch (error) {
+    threw = true;
+    caughtError = error;
+  }
+
+  if (threw) {
+    assertThrows_sync_withThrow(caughtError, expectedMessage);
+  } else {
+    fail(
+      `Expected function to throw an error, but it did not throw`,
+      assertThrows,
+    );
+  }
+}
+
+function assertThrows_sync_withThrow(
+  error: unknown,
+  expected: string | RegExp,
+): void {
+  if (!(error instanceof Error)) {
+    fail(
+      `Expected function to throw an Error, but it threw: ${JSON.stringify(error)}`,
+      assertThrows,
+    );
+  }
+
+  if (
+    (typeof expected === "string" && error.message.includes(expected)) ||
+    (expected instanceof RegExp && expected.test(error.message))
+  )
+    return;
+
+  fail(
+    `Expected error message to match ${formatExpectedMessage(expected)}, but got: ${JSON.stringify(error.message)}`,
+    assertThrows,
+  );
+}
+
+function formatExpectedMessage(expectedMessage: string | RegExp): string {
+  if (typeof expectedMessage === "string") {
+    return JSON.stringify(expectedMessage);
+  } else {
+    return expectedMessage.toString();
+  }
+}
