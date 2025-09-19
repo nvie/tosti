@@ -27,6 +27,7 @@
     "lint:prettier": "prettier --list-different src/ test/",
     "lint:package": "publint --strict && attw --pack",
     "test": "vitest run --coverage",
+    "test:typescript": "tsc --noEmit",
     "test:watch": "vitest --coverage",
     "release": "npm run test && npm run lint && npm run build && npm run lint:package && release-it"
   },
