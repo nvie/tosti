@@ -3,6 +3,7 @@ import {
   constant,
   date,
   exact,
+  inexact,
   isDecoder,
   poja,
   pojo,
@@ -31,6 +32,14 @@ export function literally(expected: unknown): Expector {
   // @ts-expect-error Normally constant() is used only with scalar values
   // In this case, however, it's fine to just use it for any literal value
   return constant(expected);
+}
+
+/**
+ * Builds an expector that ensures at least the provided values are present,
+ * but allows for more keys to be present.
+ */
+export function partial(expected: Record<PropertyKey, unknown>): Expector {
+  return pojo.pipe(inexact(mapValues(expected, makeExpector)));
 }
 
 function makeArrayExpector(expected: unknown[]): Expector {

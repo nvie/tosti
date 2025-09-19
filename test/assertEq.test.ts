@@ -2,7 +2,7 @@ import { array, either, number, string } from "decoders";
 import * as fc from "fast-check";
 import { describe, expect, test } from "vitest";
 
-import { anything, assertEq, between, gt, gte, lt, lte } from "~";
+import { anything, assertEq, between, gt, gte, lt, lte, partial } from "~";
 
 import { eventually } from "./utils";
 
@@ -175,6 +175,20 @@ new Date('2025-01-01T00:00:00.000Z')
       },
     },
   },
+}
+`);
+  });
+
+  test("deep objects with partial", () => {
+    assertEq({ a: { b: 1, c: 2 } }, { a: partial({ b: 1 }) });
+    expect(() => assertEq({ a: { c: 2 } }, { a: partial({ b: 1 }) }))
+      .toThrow(`Assertion failed:
+
+{
+  "a": {
+    "c": 2,
+  },
+       ^ Missing key: 'b'
 }
 `);
   });
