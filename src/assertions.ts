@@ -100,6 +100,7 @@ export async function assertSame_async(
   }
 
   const result = literally(expected).decode(actual);
+  // istanbul ignore if -- @preserve
   if (result.ok) {
     throw new Error("This should never happen. Please report a bug!");
   }
