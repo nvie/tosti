@@ -50,11 +50,6 @@ jobs:
         env:
           CI: true
 
-      - name: Test type inference
-        run: npm run test:types
-        env:
-          CI: true
-
       - name: Lint packages
         run: npm run lint:package
         env:

@@ -2,7 +2,6 @@
 
 - npm run test: run the unit tests with coverage
 - npm run test:watch: run tests in watch mode with coverage
-- npm run test:types: run type-level tests with tsd
 - npm run build: build the library for distribution
 - npm run lint: check code formatting and linting
 - npm run format: fix code formatting and linting issues
