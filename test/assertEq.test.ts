@@ -1,4 +1,4 @@
-import { anything, array, either, number, string } from "decoders";
+import { anything, array, either, number, string, uuid } from "decoders";
 import * as fc from "fast-check";
 import { describe, expect, test } from "vitest";
 
@@ -209,27 +209,18 @@ new Date('2025-01-01T00:00:00.000Z')
 `);
   });
 
-  // TODO Implement this?
-  //   test("can use decoders to match", () => {
-  //     expect(() => {
-  //       assertEq(
-  //         {
-  //           a: 42,
-  //         },
-  //         {
-  //           a: 42,
-  //           b: poja,
-  //           c: /^hello/,
-  //         },
-  //       );
-  //     }).toThrow(
-  //       `Assertion failed:
-  //
-  // 42
-  // ^^ Must be a Date
-  // `,
-  //     );
-  // });
+  test("can use decoders to match", () => {
+    expect(() => {
+      assertEq({ id: "test-id1" }, { id: uuid });
+    }).toThrow(
+      `Assertion failed:
+
+{
+  "id": "test-id1",
+        ^^^^^^^^^^ Must be uuid
+}`,
+    );
+  });
 });
 
 describe("assertEq w/ promises", () => {
