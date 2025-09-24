@@ -1,8 +1,8 @@
-import { array, either, number, string } from "decoders";
+import { anything, array, either, number, string } from "decoders";
 import * as fc from "fast-check";
 import { describe, expect, test } from "vitest";
 
-import { anything, assertEq, between, gt, gte, lt, lte, partially } from "~";
+import { assertEq, between, gt, gte, lt, lte, partially } from "~";
 
 import { eventually } from "./utils";
 

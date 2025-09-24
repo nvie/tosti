@@ -1,23 +1,5 @@
 import type { Decoder } from "decoders";
-import { number, unknown } from "decoders";
-
-/**
- * Is the given value a POJO (plain old JavaScript object)?
- */
-// TODO: Consider exporting this from `decoders`
-export function isPojo(value: unknown): value is Record<PropertyKey, unknown> {
-  return (
-    value !== null &&
-    value !== undefined &&
-    typeof value === "object" &&
-    // This still seems to be the only reliable way to determine whether
-    // something is a pojo... ¯\_(ツ)_/¯
-    Object.prototype.toString.call(value) === "[object Object]"
-  );
-}
-
-// Custom decoders for quick number comparisons
-export const anything = unknown;
+import { number } from "decoders";
 
 export const gte = (n: number): Decoder<number> =>
   number.refine((value) => value >= n, `Must be >= ${n}`);

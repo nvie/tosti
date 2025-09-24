@@ -5,6 +5,7 @@ import {
   exact,
   inexact,
   isDecoder,
+  isPlainObject,
   poja,
   pojo,
   regex,
@@ -12,7 +13,6 @@ import {
   unknown,
 } from "decoders";
 
-import { isPojo } from "./decoders";
 import { mapValues } from "./utils";
 
 export type Expector = Decoder<unknown>;
@@ -81,7 +81,7 @@ export function makeExpector(expectedValue: unknown): Expector {
   if (isDecoder(expectedValue)) return expectedValue;
 
   if (Array.isArray(expectedValue)) return makeArrayExpector(expectedValue);
-  if (isPojo(expectedValue)) return makeObjectExpector(expectedValue);
+  if (isPlainObject(expectedValue)) return makeObjectExpector(expectedValue);
   if (expectedValue instanceof RegExp) return makeRegexExpector(expectedValue);
   if (expectedValue instanceof Date) return makeDateExpector(expectedValue);
 
