@@ -4,6 +4,7 @@ import tsconfigPaths from "vite-tsconfig-paths";
 export default defineConfig({
   plugins: [tsconfigPaths()],
   test: {
+    silent: "passed-only",
     coverage: {
       provider: "istanbul",
       reporter: ["text", "html"],
