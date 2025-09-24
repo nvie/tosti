@@ -1,5 +1,7 @@
 ## [Unreleased]
 
+- Properly declare minimal peer dependency version
+
 ## [0.2.1] - 2025-09-24
 
 - Internal DRY-ups and improvements
