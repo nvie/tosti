@@ -4,6 +4,7 @@ import {
   date,
   exact,
   inexact,
+  instanceOf,
   isDecoder,
   isPlainObject,
   poja,
@@ -60,6 +61,20 @@ function makeArrayExpector(expected: unknown[]): Expector {
     );
 }
 
+// TODO Unit test this one, and make it more robust (duplicates, ordering, etc)
+function makeSetExpector(expected: Set<unknown>): Expector {
+  const arrComparingExpector = makeExpector(Array.from(expected));
+  return instanceOf(Set).transform(Array.from).pipe(arrComparingExpector);
+}
+
+// TODO Unit test this one, and make it more robust!
+function makeMapExpector(expected: Map<unknown, unknown>): Expector {
+  const objComparingExpector = makeExpector(Object.fromEntries(expected));
+  return instanceOf(Map)
+    .transform(Object.fromEntries)
+    .pipe(objComparingExpector);
+}
+
 function makeDateExpector(expected: Date): Expector {
   return date.reject((d) =>
     d.getTime() === expected.getTime()
@@ -82,9 +97,13 @@ export function makeExpector(expectedValue: unknown): Expector {
 
   if (Array.isArray(expectedValue)) return makeArrayExpector(expectedValue);
   if (isPlainObject(expectedValue)) return makeObjectExpector(expectedValue);
+  if (expectedValue instanceof Set) return makeSetExpector(expectedValue);
+  if (expectedValue instanceof Map) return makeMapExpector(expectedValue);
   if (expectedValue instanceof RegExp) return makeRegexExpector(expectedValue);
   if (expectedValue instanceof Date) return makeDateExpector(expectedValue);
 
   // Everything else is treated as a literal value
-  return literally(expectedValue);
+  throw new Error(
+    `Don't know how to build an expector for ${String(expectedValue)} this value out of the box`,
+  );
 }
