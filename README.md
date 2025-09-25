@@ -8,7 +8,7 @@
 [![license](https://img.shields.io/npm/l/tosti.svg)](https://github.com/nvie/tosti/blob/main/LICENSE)
 [![Code Coverage](https://img.shields.io/badge/coverage-100%25-brightgreen.svg)](https://github.com/nvie/tosti)
 
-A simple, powerful assertion library for Vitest (or any other test runner) that provides clear error messages and type-safe assertions.
+A new kind of composable assertion library for Vitest (or any other test runner) that provides clear error messages and is a joy to use.
 
 ## Features
 
