@@ -92,18 +92,23 @@ function makeRegexExpector(expectedValue: RegExp): Expector {
 }
 
 export function makeExpector(expectedValue: unknown): Expector {
-  // If it's already a decoder, nothing to build here
+  // If the expected value already is a decoder, we're done
   if (isDecoder(expectedValue)) return expectedValue;
 
-  if (Array.isArray(expectedValue)) return makeArrayExpector(expectedValue);
-  if (isPlainObject(expectedValue)) return makeObjectExpector(expectedValue);
-  if (expectedValue instanceof Set) return makeSetExpector(expectedValue);
-  if (expectedValue instanceof Map) return makeMapExpector(expectedValue);
-  if (expectedValue instanceof RegExp) return makeRegexExpector(expectedValue);
-  if (expectedValue instanceof Date) return makeDateExpector(expectedValue);
+  if (typeof expectedValue === "object" && expectedValue !== null) {
+    if (Array.isArray(expectedValue)) return makeArrayExpector(expectedValue);
+    if (isPlainObject(expectedValue)) return makeObjectExpector(expectedValue);
+    if (expectedValue instanceof Set) return makeSetExpector(expectedValue);
+    if (expectedValue instanceof Map) return makeMapExpector(expectedValue);
+    if (expectedValue instanceof RegExp)
+      return makeRegexExpector(expectedValue);
+    if (expectedValue instanceof Date) return makeDateExpector(expectedValue);
+
+    throw new Error(
+      `Don't know how to build an expector for ${String(expectedValue)} this value out of the box`,
+    );
+  }
 
   // Everything else is treated as a literal value
-  throw new Error(
-    `Don't know how to build an expector for ${String(expectedValue)} this value out of the box`,
-  );
+  return literally(expectedValue);
 }
