@@ -1,5 +1,7 @@
 ## [Unreleased]
 
+## [0.2.3] - 2026-03-03
+
 - Loosen peer dependency
 
 ## [0.2.2] - 2025-09-24
