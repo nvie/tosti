@@ -333,19 +333,22 @@ describe("assertEq w/ Set", () => {
 describe("assertEq w/ Map", () => {
   test("compares Map values", () => {
     assertEq(
-      new Map([["a", 1], ["b", 2]]),
-      new Map([["a", 1], ["b", 2]]),
+      new Map([
+        ["a", 1],
+        ["b", 2],
+      ]),
+      new Map([
+        ["a", 1],
+        ["b", 2],
+      ]),
     );
     assertEq(new Map(), new Map());
   });
 
   test("throws when Map values don't match", () => {
-    expect(() =>
-      assertEq(
-        new Map([["a", 1]]),
-        new Map([["a", 2]]),
-      ),
-    ).toThrow("Assertion failed");
+    expect(() => assertEq(new Map([["a", 1]]), new Map([["a", 2]]))).toThrow(
+      "Assertion failed",
+    );
   });
 });
 
