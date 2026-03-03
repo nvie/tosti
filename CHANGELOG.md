@@ -1,5 +1,7 @@
 ## [Unreleased]
 
+- Loosen peer dependency
+
 ## [0.2.2] - 2025-09-24
 
 - Properly declare minimal peer dependency version

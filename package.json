@@ -54,7 +54,7 @@
     "test"
   ],
   "peerDependencies": {
-    "decoders": ">=2.8.0-0 || >=2.8"
+    "decoders": "*"
   },
   "devDependencies": {
     "@arethetypeswrong/cli": "^0.18.2",
