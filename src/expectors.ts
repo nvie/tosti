@@ -105,7 +105,7 @@ export function makeExpector(expectedValue: unknown): Expector {
     if (expectedValue instanceof Date) return makeDateExpector(expectedValue);
 
     throw new Error(
-      `Don't know how to build an expector for ${String(expectedValue)} this value out of the box`,
+      `Don't know how to build an expector for this value out of the box: ${Object.prototype.toString.call(expectedValue)}`,
     );
   }
 

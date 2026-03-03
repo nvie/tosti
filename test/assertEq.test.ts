@@ -352,7 +352,7 @@ describe("assertEq w/ Map", () => {
 describe("assertEq w/ unsupported object types", () => {
   test("throws for unsupported object types", () => {
     expect(() => assertEq(new WeakMap(), new WeakMap())).toThrow(
-      "Don't know how to build an expector for",
+      "Don't know how to build an expector for this value out of the box: [object WeakMap]",
     );
   });
 });
