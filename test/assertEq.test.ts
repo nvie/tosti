@@ -316,6 +316,47 @@ describe("assertEq w/ decoders", () => {
   });
 });
 
+describe("assertEq w/ Set", () => {
+  test("compares Set values", () => {
+    assertEq(new Set([1, 2, 3]), new Set([1, 2, 3]));
+    assertEq(new Set(), new Set());
+    assertEq(new Set(["a", "b"]), new Set(["a", "b"]));
+  });
+
+  test("throws when Set values don't match", () => {
+    expect(() => assertEq(new Set([1, 2]), new Set([1, 3]))).toThrow(
+      "Assertion failed",
+    );
+  });
+});
+
+describe("assertEq w/ Map", () => {
+  test("compares Map values", () => {
+    assertEq(
+      new Map([["a", 1], ["b", 2]]),
+      new Map([["a", 1], ["b", 2]]),
+    );
+    assertEq(new Map(), new Map());
+  });
+
+  test("throws when Map values don't match", () => {
+    expect(() =>
+      assertEq(
+        new Map([["a", 1]]),
+        new Map([["a", 2]]),
+      ),
+    ).toThrow("Assertion failed");
+  });
+});
+
+describe("assertEq w/ unsupported object types", () => {
+  test("throws for unsupported object types", () => {
+    expect(() => assertEq(new WeakMap(), new WeakMap())).toThrow(
+      "Don't know how to build an expector for",
+    );
+  });
+});
+
 describe("properties", () => {
   test("∀x :: assertEq(x, structuredClone(x))", () => {
     fc.assert(
